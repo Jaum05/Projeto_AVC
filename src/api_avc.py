@@ -7,7 +7,7 @@ import pandas as pd
 
 import os
 
-from preprocess import prepare_input_dataframe
+from src.preprocess import prepare_input_dataframe
 
 app = FastAPI()
 
