@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Análise de Risco - Prevenção AVC</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background: #0f0f1a;
+    }
+    header {
+      background: #1a1a2e;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo { display: flex; align-items: center; gap: 0.5rem; color: white; font-weight: bold; font-size: 1.1rem; }
+    .logo-icon { background: #4f46e5; padding: 0.4rem 0.6rem; border-radius: 6px; }
+    nav { display: flex; gap: 2rem; }
+    nav a { color: #ccc; text-decoration: none; font-size: 0.95rem; transition: 0.3s; }
+    nav a:hover, nav a.active { color: white; }
+
+    main {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 2rem;
+    }
+
+    .form-container {
+      background: white;
+      border-radius: 18px;
+      padding: 2.8rem;
+      width: 100%;
+      max-width: 520px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+    }
+
+    .form-container h1 { text-align: center; color: #1a1a2e; margin-bottom: 0.4rem; }
+    .subtitle { text-align: center; color: #666; font-size: 0.9rem; margin-bottom: 2rem; }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .form-group { position: relative; margin-bottom: 2.2rem; }
+
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 14px 16px;
+      font-size: 0.95rem;
+      border: 1px solid #cfcfcf;
+      border-radius: 10px;
+      background: #fafafa;
+      transition: 0.25s ease;
+      outline: none;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+      border-color: #4f46e5;
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(79,70,229,0.2);
+    }
+
+    .form-group input::placeholder { color: transparent; }
+
+    .form-group label {
+      position: absolute;
+      top: 50%;
+      left: 16px;
+      transform: translateY(-50%);
+      font-size: 0.9rem;
+      color: #777;
+      padding: 0 6px;
+      background: white;
+      pointer-events: none;
+      transition: 0.25s ease;
+    }
+
+    .form-group input:focus + label,
+    .form-group input:not(:placeholder-shown) + label {
+      top: -10px;
+      font-size: 0.75rem;
+      color: #4f46e5;
+    }
+
+    .form-group select + label {
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    .form-group select:focus + label,
+    .form-group select:valid + label {
+      top: -10px;
+      font-size: 0.75rem;
+      color: #4f46e5;
+    }
+
+    .form-group select {
+      appearance: none;
+      background-image: url("data:image/svg+xml;utf8,<svg fill='gray' height='24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
+      background-position: right 14px center;
+      background-repeat: no-repeat;
+      background-size: 18px;
+      padding-right: 40px;
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 1rem;
+      border-radius: 12px;
+      background: linear-gradient(90deg, #4f46e5, #6b63ff);
+      border: none;
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: white;
+      cursor: pointer;
+      margin-top: 0.5rem;
+      transition: 0.25s;
+    }
+
+    footer {
+      background: #1a1a2e;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    @media(max-width:768px){ .form-row { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <span class="logo-icon"><i class="fa-solid fa-brain"></i></span>
+    Prevenção AVC
+  </div>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="analise.html" class="active">Análise</a>
+    <a href="resultados.html">Resultados</a>
+  </nav>
+</header>
+
+<main>
+  <div class="form-container">
+    <h1>Análise de Risco de AVC</h1>
+    <p class="subtitle">Informe seus dados para cálculo personalizado do risco.</p>
+
+    <form id="prediction-form">
+
+      <div class="form-row">
+        <div class="form-group">
+          <input type="text" id="gender" name="gender" placeholder=" " required list="list-gender">
+          <label for="gender">Gênero</label>
+          <datalist id="list-gender">
+            <option value="Masculino">
+            <option value="Feminino">
+            <option value="Outro">
+          </datalist>
+        </div>
+
+        <div class="form-group">
+          <input type="number" id="age" name="age" placeholder=" " required>
+          <label for="age">Idade</label>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <select id="hypertension" name="hypertension" required>
+            <option value="" disabled selected hidden></option>
+            <option value="0">Não</option>
+            <option value="1">Sim</option>
+          </select>
+          <label for="hypertension">Hipertensão</label>
+        </div>
+
+        <div class="form-group">
+          <select id="heart_disease" name="heart_disease" required>
+            <option value="" disabled selected hidden></option>
+            <option value="0">Não</option>
+            <option value="1">Sim</option>
+          </select>
+          <label for="heart_disease">Doença Cardíaca</label>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <select id="ever_married" name="ever_married" required>
+            <option value="" disabled selected hidden></option>
+            <option value="Yes">Casado(a)</option>
+            <option value="No">Solteiro(a)</option>
+          </select>
+          <label for="ever_married">Estado Civil</label>
+        </div>
+
+        <div class="form-group">
+          <select id="work_type" name="work_type" required>
+            <option value="" disabled selected hidden></option>
+            <option value="Private">Privado</option>
+            <option value="Self-employed">Autônomo</option>
+            <option value="Govt_job">Governo</option>
+            <option value="children">Criança</option>
+            <option value="Never_worked">Nunca trabalhou</option>
+          </select>
+          <label for="work_type">Tipo de Trabalho</label>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <select id="Residence_type" name="Residence_type" required>
+            <option value="" disabled selected hidden></option>
+            <option value="Urban">Urbano</option>
+            <option value="Rural">Rural</option>
+          </select>
+          <label for="Residence_type">Tipo de Residência</label>
+        </div>
+
+        <div class="form-group">
+          <input type="number" id="avg_glucose_level" name="avg_glucose_level" placeholder=" " step="0.01" required>
+          <label for="avg_glucose_level">Nível de Glicose (mg/dL)</label>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <input type="number" id="bmi" name="bmi" placeholder=" " step="0.1" required>
+          <label for="bmi">IMC</label>
+        </div>
+
+        <div class="form-group">
+          <select id="smoking_status" name="smoking_status" required>
+            <option value="" disabled selected hidden></option>
+            <option value="never smoked">Nunca fumou</option>
+            <option value="formerly smoked">Parou de fumar</option>
+            <option value="smokes">Fuma</option>
+            <option value="Unknown">Desconhecido</option>
+          </select>
+          <label for="smoking_status">Tabagismo</label>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-submit">Calcular Risco</button>
+    </form>
+  </div>
+</main>
+
+<footer>
+  <p style="color:#ccc">© 2025 Prevenção AVC — Demonstração Educativa</p>
+</footer>
+
+<script>
+  document.getElementById('prediction-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const btn = e.target.querySelector('.btn-submit');
+    btn.disabled = true;
+    btn.textContent = 'Calculando...';
+
+    const formData = {
+      gender: document.getElementById('gender').value,
+      age: parseFloat(document.getElementById('age').value),
+      hypertension: parseInt(document.getElementById('hypertension').value),
+      heart_disease: parseInt(document.getElementById('heart_disease').value),
+      ever_married: document.getElementById('ever_married').value,
+      work_type: document.getElementById('work_type').value,
+      Residence_type: document.getElementById('Residence_type').value,
+      avg_glucose_level: parseFloat(document.getElementById('avg_glucose_level').value),
+      bmi: parseFloat(document.getElementById('bmi').value),
+      smoking_status: document.getElementById('smoking_status').value
+    };
+
+    try {
+      const response = await fetch('http://localhost:8000/predict', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
+
+      const result = await response.json();
+
+      
+      localStorage.setItem('avc_result', JSON.stringify(result));
+      localStorage.setItem('avc_formData', JSON.stringify(formData));
+
+      
+      window.location.href = 'resultados.html';
+
+    } catch (error) {
+      alert('Erro ao conectar com a API. Verifique se o servidor está rodando.');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Calcular Risco';
+    }
+  });
+</script>
+

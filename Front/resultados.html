@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Resultados - Prevenção AVC</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background: #0f0f1a;
+    }
+
+    header {
+      background: #1a1a2e;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: white;
+      font-weight: bold;
+      font-size: 1.1rem;
+    }
+
+    .logo-icon {
+      background: #4f46e5;
+      padding: 0.4rem 0.6rem;
+      border-radius: 6px;
+    }
+
+    nav {
+      display: flex;
+      gap: 2rem;
+    }
+
+    nav a {
+      color: #ccc;
+      text-decoration: none;
+      font-size: 0.95rem;
+      transition: color 0.3s;
+    }
+
+    nav a:hover, nav a.active {
+      color: white;
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 2rem;
+    }
+
+    .result-container {
+      background: white;
+      border-radius: 16px;
+      padding: 2.5rem;
+      width: 100%;
+      max-width: 700px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+
+    .result-container h1 {
+      font-size: 1.5rem;
+      color: #1a1a2e;
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+
+    .result-content {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .risk-display {
+      text-align: center;
+    }
+
+    .risk-circle {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1rem;
+      font-weight: bold;
+      font-size: 1.1rem;
+      color: white;
+    }
+
+    .risk-circle.baixo { background: linear-gradient(135deg, #22c55e, #16a34a); }
+    .risk-circle.medio { background: linear-gradient(135deg, #f59e0b, #d97706); }
+    .risk-circle.alto { background: linear-gradient(135deg, #ef4444, #dc2626); }
+
+    .risk-label {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #1a1a2e;
+    }
+
+    .risk-percent {
+      color: #666;
+      font-size: 0.95rem;
+      margin-top: 0.25rem;
+    }
+
+    .factors-analysis h3 {
+      font-size: 1rem;
+      color: #1a1a2e;
+      margin-bottom: 1rem;
+    }
+
+    .factor-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+
+    .factor-name {
+      flex: 1;
+      font-size: 0.9rem;
+      color: #444;
+    }
+
+    .factor-bar-container {
+      width: 120px;
+      height: 8px;
+      background: #e5e7eb;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .factor-bar {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.5s ease;
+    }
+
+    .factor-bar.green { background: #22c55e; }
+    .factor-bar.yellow { background: #f59e0b; }
+    .factor-bar.red { background: #ef4444; }
+
+    .recommendations {
+      border-top: 1px solid #e5e7eb;
+      padding-top: 1.5rem;
+    }
+
+    .recommendations h3 {
+      font-size: 1rem;
+      color: #1a1a2e;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid #4f46e5;
+      display: inline-block;
+    }
+
+    .recommendations ul {
+      list-style: none;
+    }
+
+    .recommendations li {
+      font-size: 0.9rem;
+      color: #444;
+      margin-bottom: 0.5rem;
+      padding-left: 1.25rem;
+      position: relative;
+    }
+
+    .recommendations li::before {
+      content: "•";
+      color: #4f46e5;
+      font-weight: bold;
+      position: absolute;
+      left: 0;
+    }
+
+    .actions {
+      display: flex;
+      gap: 1rem;
+      margin-top: 2rem;
+      justify-content: center;
+    }
+
+    .btn {
+      padding: 0.875rem 1.5rem;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .btn-primary {
+      background: #4f46e5;
+      color: white;
+      border: none;
+    }
+
+    .btn-secondary {
+      background: white;
+      color: #1a1a2e;
+      border: 2px solid #1a1a2e;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .no-result {
+      text-align: center;
+      padding: 3rem;
+    }
+
+    .no-result p {
+      color: #666;
+      margin-bottom: 1.5rem;
+    }
+
+    footer {
+      background: #1a1a2e;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      margin-bottom: 1rem;
+    }
+
+    .footer-links a {
+      color: #ccc;
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+
+    .footer-links a:hover { color: white; }
+
+    .footer-copy {
+      color: #666;
+      font-size: 0.85rem;
+    }
+
+    @media (max-width: 768px) {
+      header { flex-direction: column; gap: 1rem; }
+      .result-content { grid-template-columns: 1fr; }
+      .actions { flex-direction: column; }
+      .btn { text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+     <div class="logo">
+    <span class="logo-icon">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="white" width="20" height="20">
+      <path d="M184 0c30.9 0 56 25.1 56 56V456c0 30.9-25.1 56-56 56c-28.9 0-52.7-21.9-55.7-50.1c-5.2 1.4-10.7 2.1-16.3 2.1c-35.3 0-64-28.7-64-64c0-7.4 1.3-14.6 3.6-21.2C21.4 367.4 0 338.2 0 304c0-31.9 18.7-59.5 45.8-72.3C37.1 220.8 32 207 32 192c0-30.7 21.6-56.3 50.4-62.6C80.8 123.9 80 118 80 112c0-29.9 20.6-55.1 48.3-62.1C131.3 21.9 155.1 0 184 0zM328 0c28.9 0 52.6 21.9 55.7 49.9c27.8 7 48.3 32.1 48.3 62.1c0 6-.8 11.9-2.4 17.4c28.8 6.2 50.4 31.9 50.4 62.6c0 15-5.1 28.8-13.8 39.7C493.3 244.5 512 272.1 512 304c0 34.2-21.4 63.4-51.6 74.8c2.3 6.6 3.6 13.8 3.6 21.2c0 35.3-28.7 64-64 64c-5.6 0-11.1-.7-16.3-2.1c-3 28.2-26.8 50.1-55.7 50.1c-30.9 0-56-25.1-56-56V56c0-30.9 25.1-56 56-56z"/>
+    </svg>
+  </span>
+  Prevenção AVC
+</div>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="analise.html">Análise</a>
+      <a href="resultados.html" class="active">Resultados</a>
+    </nav>
+  </header>
+
+  <main>
+    <div class="result-container">
+      <h1>Seu Risco de AVC</h1>
+      
+      <div id="result-content">
+        <div class="no-result">
+          <p>Nenhuma análise realizada ainda.</p>
+          <a href="analise.html" class="btn btn-primary">Fazer Análise</a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="footer-links">
+      <a href="#">Contato</a>
+      <a href="#">Política de Privacidade</a>
+      <a href="#">FAQ</a>
+    </div>
+    <p class="footer-copy">© 2024 Prevenção AVC. Esta é uma demonstração educativa.</p>
+  </footer>
+
+  <script>
+    function getRiskLevel(probability) {
+      if (probability < 30) return { level: 'BAIXO', class: 'baixo', label: 'Risco Baixo' };
+      if (probability < 60) return { level: 'MÉDIO', class: 'medio', label: 'Risco Médio' };
+      return { level: 'ALTO', class: 'alto', label: 'Risco Alto' };
+    }
+
+    function getFactorRisk(name, value, formData) {
+      const risks = {
+        age: { value: formData.age > 55 ? 80 : formData.age > 40 ? 50 : 20, color: formData.age > 55 ? 'red' : formData.age > 40 ? 'yellow' : 'green' },
+        hypertension: { value: formData.hypertension ? 90 : 20, color: formData.hypertension ? 'red' : 'green' },
+        bmi: { value: formData.bmi > 30 ? 80 : formData.bmi > 25 ? 50 : 20, color: formData.bmi > 30 ? 'red' : formData.bmi > 25 ? 'yellow' : 'green' },
+        glucose: { value: formData.avg_glucose_level > 140 ? 80 : formData.avg_glucose_level > 100 ? 50 : 20, color: formData.avg_glucose_level > 140 ? 'red' : formData.avg_glucose_level > 100 ? 'yellow' : 'green' },
+        smoking: { value: formData.smoking_status === 'smokes' ? 90 : formData.smoking_status === 'formerly smoked' ? 50 : 20, color: formData.smoking_status === 'smokes' ? 'red' : formData.smoking_status === 'formerly smoked' ? 'yellow' : 'green' }
+      };
+      return risks[name] || { value: 30, color: 'green' };
+    }
+
+    function getRecommendations(formData, probability) {
+      const recs = ['Consulte um médico para avaliação detalhada.'];
+      if (formData.hypertension) recs.push('Controle rigorosamente a pressão arterial.');
+      if (formData.bmi > 25) recs.push(`Reduza o peso se necessário (IMC ideal: 18.5-24.9).`);
+      if (formData.smoking_status === 'smokes') recs.push('Pare de fumar imediatamente se for fumante.');
+      if (formData.avg_glucose_level > 100) recs.push('Monitore e controle os níveis de glicose.');
+      recs.push('Pratique exercícios sob orientação médica.');
+      return recs;
+    }
+
+    function renderResult() {
+      const resultData = localStorage.getItem('avc_result');
+      const formDataStr = localStorage.getItem('avc_formData');
+
+      if (!resultData || !formDataStr) return;
+
+      const result = JSON.parse(resultData);
+      const formData = JSON.parse(formDataStr);
+      const risk = getRiskLevel(result.probability);
+      const recommendations = getRecommendations(formData, result.probability);
+
+      const factors = [
+        { name: 'Pressão Arterial', key: 'hypertension' },
+        { name: 'IMC', key: 'bmi' },
+        { name: 'Idade', key: 'age' },
+        { name: 'Glicose', key: 'glucose' },
+        { name: 'Tabagismo', key: 'smoking' }
+      ];
+
+      document.getElementById('result-content').innerHTML = `
+        <div class="result-content">
+          <div class="risk-display">
+            <div class="risk-circle ${risk.class}">${risk.level}</div>
+            <div class="risk-label">${risk.label}</div>
+            <div class="risk-percent">${result.probability}% de risco</div>
+          </div>
+          <div class="factors-analysis">
+            <h3>Análise dos Fatores</h3>
+            ${factors.map(f => {
+              const factorRisk = getFactorRisk(f.key, null, formData);
+              return `
+                <div class="factor-item">
+                  <span class="factor-name">${f.name}</span>
+                  <div class="factor-bar-container">
+                    <div class="factor-bar ${factorRisk.color}" style="width: ${factorRisk.value}%"></div>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+        <div class="recommendations">
+          <h3>Recomendações Personalizadas</h3>
+          <ul>
+            ${recommendations.map(r => `<li>${r}</li>`).join('')}
+          </ul>
+        </div>
+        <div class="actions">
+          <button class="btn btn-primary" onclick="shareResults()">Compartilhar Resultados</button>
+          <a href="analise.html" class="btn btn-secondary">Nova Análise</a>
+        </div>
+      `;
+    }
+
+    function shareResults() {
+      if (navigator.share) {
+        navigator.share({ title: 'Meu Risco de AVC', text: 'Confira minha análise de risco de AVC', url: window.location.href });
+      } else {
+        alert('Compartilhamento não suportado neste navegador.');
+      }
+    }
+
+    renderResult();
+  </script>
+
+</body>
+</html>
