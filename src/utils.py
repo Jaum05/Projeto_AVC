@@ -1,15 +1,3 @@
-# src/utils.py
-"""
-Utils limpo e focado em helpers (sem treino de modelo).
-Contém:
- - load_data: carregar CSV
- - basic_clean: limpeza leve e remoção de id
- - get_features_target: separar X e y
- - split_data: train_test_split com stratify (se aplicável)
- - evaluate_model: gerar métricas (usa y_true e y_pred)
- - save_artifact / load_artifact: salvar / carregar dict {pipeline, threshold, metadata}
- - predict_from_raw: utilitário para inferência usando payload bruto + reference_df
-"""
 
 import os
 import joblib
@@ -19,9 +7,6 @@ from sklearn.metrics import accuracy_score, classification_report, precision_sco
 from typing import Tuple, Optional, Dict, Any
 
 
-# ----------------------------
-# I/O e limpeza simples
-# ----------------------------
 def load_data(path: str) -> pd.DataFrame:
     """
     Carrega CSV em um DataFrame.
@@ -72,9 +57,6 @@ def split_data(df: pd.DataFrame, target: str = "stroke", test_size: float = 0.2,
     return X_train, X_test, y_train, y_test
 
 
-# ----------------------------
-# Avaliação
-# ----------------------------
 def evaluate_model(y_true, y_pred) -> Dict[str, float]:
     """
     Calcula métricas básicas e imprime relatório.
@@ -95,9 +77,6 @@ def evaluate_model(y_true, y_pred) -> Dict[str, float]:
     return {"accuracy": acc, "precision": prec, "recall": rec, "f1": f1}
 
 
-# ----------------------------
-# Artifact helper (pipeline + threshold + metadata)
-# ----------------------------
 def save_artifact(pipeline_obj, threshold: float = 0.492, path: str = "./models/artifact_stroke.pkl",
                   metadata: Optional[Dict[str, Any]] = None) -> None:
     """
@@ -123,9 +102,6 @@ def load_artifact(path: str = "./models/artifact_stroke.pkl"):
     return joblib.load(path)
 
 
-# ----------------------------
-# Inferência a partir de payload bruto
-# ----------------------------
 def predict_from_raw(artifact_or_model, payload_json: dict, reference_df: pd.DataFrame) -> Dict[str, Any]:
     """
     Faz predição a partir de um payload bruto (dicionário), usando prepare_input_dataframe
@@ -140,16 +116,13 @@ def predict_from_raw(artifact_or_model, payload_json: dict, reference_df: pd.Dat
     Retorna:
       {"prediction": int(0|1), "probability": float|None, "threshold_used": float|None}
     """
-    # import local para evitar dependência circular em módulos que importam utils
     from src.preprocess import prepare_input_dataframe
 
-    # validações iniciais
     if not isinstance(payload_json, dict):
         raise ValueError("payload_json deve ser um dicionário (JSON-like).")
     if not isinstance(reference_df, pd.DataFrame):
         raise ValueError("reference_df deve ser um pandas.DataFrame (o dataframe de referência do treino).")
 
-    # determinar model e threshold de forma segura
     if isinstance(artifact_or_model, dict):
         if "pipeline" not in artifact_or_model:
             raise ValueError("artifact dict deve conter a chave 'pipeline'.")
@@ -162,15 +135,14 @@ def predict_from_raw(artifact_or_model, payload_json: dict, reference_df: pd.Dat
     else:
         raise ValueError("artifact_or_model inválido: deve ser um dict com 'pipeline' ou um model com método predict.")
 
-    # alinhar o payload com as colunas do reference_df (sem transformar)
+    
     input_df = prepare_input_dataframe(payload_json, reference_df)
 
     result = {"prediction": None, "probability": None, "threshold_used": threshold}
 
-    # tentar predict_proba -> se não suportar, fallback para predict
     try:
         proba_arr = model.predict_proba(input_df)
-        # assumir que a coluna 1 é a prob da classe positiva
+        
         if proba_arr is None:
             raise RuntimeError("model.predict_proba retornou None")
         if proba_arr.ndim != 2:
@@ -183,16 +155,14 @@ def predict_from_raw(artifact_or_model, payload_json: dict, reference_df: pd.Dat
         if threshold is not None:
             result["prediction"] = int(prob_pos >= float(threshold))
         else:
-            # sem threshold, usar a decisão direta do classificador
             result["prediction"] = int(model.predict(input_df)[0])
     except Exception as e_proba:
-        # fallback: tentar predict direto e reportar erro original para debug
+        
         try:
             pred = int(model.predict(input_df)[0])
             result["prediction"] = pred
             result["probability"] = None
             result["threshold_used"] = threshold
-            # anexar informação de debug (não obrigatório)
             result["_warning"] = f"predict_proba falhou: {e_proba}; usado predict() como fallback."
         except Exception as e_pred:
             raise RuntimeError(f"Falha ao predizer: predict_proba erro: {e_proba}; fallback predict erro: {e_pred}")
