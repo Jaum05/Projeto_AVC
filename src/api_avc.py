@@ -5,10 +5,8 @@ import joblib
 from typing import Optional
 import pandas as pd
 import os
-
-# helpers do projeto
 from src.preprocess import prepare_input_dataframe
-from src.utils import load_artifact  # usa a função defensiva que criamos
+from src.utils import load_artifact  
 
 app = FastAPI()
 
@@ -20,32 +18,26 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# caminhos / configs
 ARTIFACT_PATH = os.getenv("ARTIFACT_PATH", "./models/artifact_stroke.pkl")
 MODEL_PATH = os.getenv("MODEL_PATH", "./models/stroke_model.pkl")
 DATA_PATH = os.getenv("DATA_PATH", "./data/stroke_clean.csv")
-# fallback threshold (será sobrescrito se artifact trouxer threshold)
 DEFAULT_THRESHOLD = float(os.getenv("PRED_THRESHOLD", 0.492))
 
 
-# Carregar modelo/artifact com segurança
 _model = None
 _model_threshold = DEFAULT_THRESHOLD
 
-# Tenta artifact primeiro (pipeline + threshold)
 try:
     if os.path.exists(ARTIFACT_PATH):
-        artifact = load_artifact(ARTIFACT_PATH)  # pode lançar FileNotFoundError ou retornar dict/pipeline
+        artifact = load_artifact(ARTIFACT_PATH)  
         if isinstance(artifact, dict) and "pipeline" in artifact:
             _model = artifact["pipeline"]
             _model_threshold = float(artifact.get("threshold", DEFAULT_THRESHOLD))
             print(f"✔ Carregado artifact: {ARTIFACT_PATH} (threshold={_model_threshold})")
         else:
-            # se o artifact for um pipeline direto
             _model = artifact
             print(f"✔ Carregado pipeline direto de artifact: {ARTIFACT_PATH}")
     else:
-        # fallback para MODEL_PATH (compatibilidade)
         if os.path.exists(MODEL_PATH):
             _model = joblib.load(MODEL_PATH)
             print(f"✔ Carregado modelo isolado: {MODEL_PATH} (sem threshold salvo)")
@@ -58,7 +50,6 @@ except Exception as e:
 model = _model
 MODEL_THRESHOLD = _model_threshold
 
-# carregar reference_df de forma segura
 reference_df = None
 try:
     if os.path.exists(DATA_PATH):
@@ -94,15 +85,13 @@ async def predict(data: PredictInput):
             raise RuntimeError("reference_df não disponível. Verifique DATA_PATH.")
 
         raw = data.model_dump()
-        raw.pop("ever_married", None)  # mantém compatibilidade com sua lógica atual
+        raw.pop("ever_married", None)  
 
         input_df = prepare_input_dataframe(raw, reference_df)
 
-        # tenta obter probabilidade; se não suportar, usa predict como fallback
         try:
             proba = model.predict_proba(input_df)[0][1]
         except Exception as e_proba:
-            # fallback: tentar usar predict (0/1)
             try:
                 pred_val = int(model.predict(input_df)[0])
                 return {
@@ -116,7 +105,7 @@ async def predict(data: PredictInput):
 
         return {
             "prediction": int(proba >= MODEL_THRESHOLD),
-            "probability": round(float(proba * 100), 2),
+            "probability": float(proba),
             "threshold_used": MODEL_THRESHOLD
         }
 
